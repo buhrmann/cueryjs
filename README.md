@@ -16,7 +16,7 @@ deno add @graphext/cuery
 ## Requirements
 
 - Deno runtime
-- `OPENAI_API_KEY` environment variable
+- An API key for the model provider you use: `OPENAI_API_KEY` (gpt-*, o*), `GEMINI_API_KEY` or `GOOGLE_API_KEY` (gemini-*), `ANTHROPIC_API_KEY` (claude-*)
 
 ## License
 

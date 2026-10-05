@@ -97,11 +97,15 @@ export class GoogleProvider implements LLMProvider {
 			const text = response.text ?? '';
 			const usageMetadata = response.usageMetadata;
 
+			// Gemini bills thinking tokens as output but reports them apart from the candidates.
+			const thoughts = usageMetadata?.thoughtsTokenCount ?? 0;
 			const usage: TokenUsage | null = usageMetadata
 				? {
 						inputTokens: usageMetadata.promptTokenCount ?? 0,
-						outputTokens: usageMetadata.candidatesTokenCount ?? 0,
+						outputTokens: (usageMetadata.candidatesTokenCount ?? 0) + thoughts,
 						totalTokens: usageMetadata.totalTokenCount ?? 0,
+						cachedInputTokens: usageMetadata.cachedContentTokenCount ?? 0,
+						reasoningTokens: thoughts,
 					}
 				: null;
 

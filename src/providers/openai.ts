@@ -145,6 +145,8 @@ export class OpenAIProvider implements LLMProvider {
 					inputTokens: response.usage.input_tokens,
 					outputTokens: response.usage.output_tokens,
 					totalTokens: response.usage.total_tokens,
+					cachedInputTokens: response.usage.input_tokens_details?.cached_tokens ?? 0,
+					reasoningTokens: response.usage.output_tokens_details?.reasoning_tokens ?? 0,
 				}
 				: null;
 

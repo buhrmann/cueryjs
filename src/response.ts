@@ -11,9 +11,17 @@ import { calculateCost } from './providers/pricing.ts';
  * Token usage from a single LLM call.
  */
 export interface TokenUsage {
+	/** All prompt tokens, including cached and cache-write tokens. */
 	inputTokens: number;
+	/** All generated tokens, including reasoning/thinking tokens. */
 	outputTokens: number;
 	totalTokens: number;
+	/** Prompt tokens served from the provider's cache (part of `inputTokens`). */
+	cachedInputTokens?: number;
+	/** Prompt tokens written to the cache (part of `inputTokens`; Anthropic only). */
+	cacheWriteTokens?: number;
+	/** Reasoning/thinking tokens (part of `outputTokens`). */
+	reasoningTokens?: number;
 }
 
 /**
@@ -140,6 +148,9 @@ export class BatchResponse<T> implements Iterable<T> {
 			inputTokens: valid.reduce((sum, u) => sum + u.inputTokens, 0),
 			outputTokens: valid.reduce((sum, u) => sum + u.outputTokens, 0),
 			totalTokens: valid.reduce((sum, u) => sum + u.totalTokens, 0),
+			cachedInputTokens: valid.reduce((sum, u) => sum + (u.cachedInputTokens ?? 0), 0),
+			cacheWriteTokens: valid.reduce((sum, u) => sum + (u.cacheWriteTokens ?? 0), 0),
+			reasoningTokens: valid.reduce((sum, u) => sum + (u.reasoningTokens ?? 0), 0),
 		};
 
 		// Calculate cost if we have a model

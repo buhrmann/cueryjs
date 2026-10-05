@@ -1,6 +1,6 @@
 {
 	"name": "@graphext/cuery",
-	"version": "0.11.14",
+	"version": "0.12.0",
 	"license": "MIT",
 	"exports": {
 		".": "./mod.ts",
@@ -8,6 +8,7 @@
 	},
 	"imports": {
 		"@openai/openai": "npm:openai@^6.9.1",
+		"@anthropic-ai/sdk": "npm:@anthropic-ai/sdk@^0.128.0",
 		"@google/genai": "npm:@google/genai@^1.37.0",
 		"@zod/zod": "jsr:@zod/zod@^4.3",
 		"tldts": "npm:tldts@^6.1.71",

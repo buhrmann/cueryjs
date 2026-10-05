@@ -2,7 +2,7 @@
  * Provider registry and pricing.
  *
  * This module consolidates all provider-related functionality:
- * - Provider implementations (OpenAI, Google)
+ * - Provider implementations (OpenAI, Google, Anthropic)
  * - Cost calculation utilities
  */
 
@@ -12,6 +12,7 @@ export { getProvider, getProviderForModel } from './registry.ts';
 // Re-export provider implementations
 export { OpenAIProvider } from './openai.ts';
 export { GoogleProvider } from './google.ts';
+export { AnthropicProvider } from './anthropic.ts';
 export { SchemaValidationError } from './errors.ts';
 
 // Re-export pricing utilities

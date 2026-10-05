@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cuery is a TypeScript/Deno library providing LLM-powered tools for generating structured marketing data. It supports multiple LLM providers (OpenAI, Gemini) with Zod schema validation for type-safe, predictable outputs.
+Cuery is a TypeScript/Deno library providing LLM-powered tools for generating structured marketing data. It supports multiple LLM providers (OpenAI, Gemini, Anthropic) with Zod schema validation for type-safe, predictable outputs.
 
 ## Commands
 
@@ -39,6 +39,7 @@ cueryjs/
 │   │   ├── index.ts            # Provider registry and Model factory
 │   │   ├── openai.ts           # OpenAI provider
 │   │   ├── gemini.ts           # Google Gemini provider
+│   │   ├── anthropic.ts        # Anthropic Claude provider
 │   │   ├── model.ts            # Model interface and factory
 │   │   └── pricing.ts          # Model pricing lookup
 │   ├── assets/
@@ -84,10 +85,12 @@ All LLM calls go through `src/llm.ts` which provides:
 - `askLLM()` - Direct LLM call with Zod schema validation
 - `askLLMSafe()` - Wrapped version with retry logic and error handling
 
-Supports multiple providers (OpenAI, Gemini) via the `src/providers/` module:
-- `getProviderForModel('gpt-4.1')` - Get provider instance for a model
-- `getModelPricing('gpt-4.1')` - Get model pricing info
-- `calculateCost('gpt-4.1', usage)` - Calculate cost from token usage
+Supports multiple providers (OpenAI, Gemini, Anthropic) via the `src/providers/` module:
+- `getProviderForModel('gpt-4.1')` - Get provider instance for a model (`gemini-*` → Google, `claude-*` → Anthropic, anything else → OpenAI)
+- `getModelPricing('gpt-4.1')` - Get model pricing info (the model's own provider's price from models.dev; run `deno task update-models` to refresh)
+- `calculateCost('gpt-4.1', usage)` - Calculate cost from token usage; cached and cache-write input tokens are charged at their own rates
+
+`TokenUsage.inputTokens` is the whole prompt and `outputTokens` all generated tokens, including reasoning/thinking. `cachedInputTokens`, `cacheWriteTokens` and `reasoningTokens` break them down when the provider reports them.
 
 ### Schemas
 
