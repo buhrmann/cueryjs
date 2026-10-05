@@ -190,8 +190,9 @@ export function calculateCost(modelId: string, usage: TokenUsage): UsageCost | n
 		return null;
 	}
 
-	const cached = usage.cachedInputTokens ?? 0;
-	const cacheWrite = usage.cacheWriteTokens ?? 0;
+	// Cache breakdowns are part of inputTokens; clamp so inconsistent usage can't overcharge.
+	const cached = Math.min(usage.cachedInputTokens ?? 0, usage.inputTokens);
+	const cacheWrite = Math.min(usage.cacheWriteTokens ?? 0, usage.inputTokens - cached);
 	const uncached = Math.max(0, usage.inputTokens - cached - cacheWrite);
 	const inputCost = (
 		uncached * pricing.input

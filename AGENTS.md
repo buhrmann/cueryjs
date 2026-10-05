@@ -140,12 +140,14 @@ Run with OpenAI tests: `RUN_OPENAI_TESTS=1 deno task test`
 
 - `OPENAI_API_KEY` - Required for OpenAI models
 - `GOOGLE_API_KEY` or `GEMINI_API_KEY` - Required for Gemini models
+- `ANTHROPIC_API_KEY` - Required for Claude models
 - `RUN_OPENAI_TESTS` - Set to run integration tests
 
 ## Dependencies
 
 - `@openai/openai` - OpenAI API client
 - `@google/genai` - Google Gemini API client
+- `@anthropic-ai/sdk` - Anthropic (Claude) API client
 - `@zod/zod` - Schema validation (Zod 4)
 - `@std/assert` - Deno standard library assertions
 

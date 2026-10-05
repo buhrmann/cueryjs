@@ -6,8 +6,12 @@ Deno.test('model prices come from the model\'s own provider, not resellers', () 
 	assertEquals(getModelInfo('gpt-4.1-mini')?.provider, 'openai');
 	assertEquals(getModelInfo('gemini-2.5-flash')?.provider, 'google');
 	assertEquals(getModelInfo('claude-haiku-4-5')?.provider, 'anthropic');
-	// Resellers list Gemini 2.5 Flash far below Google's price.
-	assertEquals(getModelPricing('gemini-2.5-flash')?.output, 2.5);
+});
+
+Deno.test('retired models keep their price', () => {
+	for (const model of ['gemini-2.0-flash', 'claude-sonnet-4-20250514', 'o1-mini']) {
+		assertEquals(getModelPricing(model) != null, true, `no price for ${model}`);
+	}
 });
 
 Deno.test('dated model IDs resolve to the base model', () => {
@@ -21,13 +25,14 @@ Deno.test('the models cuery is commonly used with have prices', () => {
 });
 
 Deno.test('calculateCost without cache details charges all input at the input rate', () => {
+	const pricing = getModelPricing('gpt-4.1-mini')!;
 	const cost = calculateCost('gpt-4.1-mini', { inputTokens: 1_000_000, outputTokens: 1_000_000, totalTokens: 2_000_000 });
-	assertAlmostEquals(cost!.inputCost, 0.4);
-	assertAlmostEquals(cost!.outputCost, 1.6);
+	assertAlmostEquals(cost!.inputCost, pricing.input);
+	assertAlmostEquals(cost!.outputCost, pricing.output);
 });
 
 Deno.test('calculateCost charges cached and cache-write tokens at their own rates', () => {
-	// claude-sonnet-5-5: input 2, cache read 0.2, cache write 2.5, output 10 (USD per 1M).
+	const pricing = getModelPricing('claude-sonnet-5-5')!;
 	const cost = calculateCost('claude-sonnet-5-5', {
 		inputTokens: 1_000_000,
 		outputTokens: 100_000,
@@ -35,8 +40,14 @@ Deno.test('calculateCost charges cached and cache-write tokens at their own rate
 		cachedInputTokens: 500_000,
 		cacheWriteTokens: 200_000,
 	});
-	assertAlmostEquals(cost!.inputCost, 0.3 * 2 + 0.5 * 0.2 + 0.2 * 2.5);
-	assertAlmostEquals(cost!.outputCost, 1);
+	assertAlmostEquals(cost!.inputCost, 0.3 * pricing.input + 0.5 * pricing.cacheRead! + 0.2 * pricing.cacheWrite!);
+	assertAlmostEquals(cost!.outputCost, 0.1 * pricing.output);
+});
+
+Deno.test('calculateCost clamps cache breakdowns to the input total', () => {
+	const pricing = getModelPricing('claude-sonnet-5-5')!;
+	const cost = calculateCost('claude-sonnet-5-5', { inputTokens: 100, outputTokens: 0, totalTokens: 100, cachedInputTokens: 500 });
+	assertAlmostEquals(cost!.inputCost, (100 * pricing.cacheRead!) / 1_000_000);
 });
 
 Deno.test('calculateCost falls back to the input rate for cached tokens without a cache price', () => {

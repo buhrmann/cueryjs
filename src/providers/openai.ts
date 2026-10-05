@@ -23,10 +23,32 @@ const zodTextFormatCache = new Map<z.ZodTypeAny, AutoParseableTextFormat<unknown
  * - additionalProperties must be false (not empty object or missing)
  * - propertyNames is not permitted
  */
-function sanitizeSchemaForOpenAI(schema: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeSchemaForOpenAI(schema: Record<string, unknown>): Record<string, unknown> {
 	const result: Record<string, unknown> = {};
 
 	for (const [key, value] of Object.entries(schema)) {
+		// Literal data: copy as is.
+		if (key === 'default' || key === 'const' || key === 'enum' || key === 'examples' || key === 'required') {
+			result[key] = value;
+			continue;
+		}
+
+		// Maps of names to subschemas: the names are data, not keywords.
+		if (
+			(key === 'properties' || key === 'patternProperties' || key === '$defs' || key === 'definitions')
+			&& value && typeof value === 'object' && !Array.isArray(value)
+		) {
+			result[key] = Object.fromEntries(
+				Object.entries(value as Record<string, unknown>).map(([name, subschema]) => [
+					name,
+					subschema && typeof subschema === 'object' && !Array.isArray(subschema)
+						? sanitizeSchemaForOpenAI(subschema as Record<string, unknown>)
+						: subschema,
+				]),
+			);
+			continue;
+		}
+
 		// Remove unsupported keys
 		if (key === 'propertyNames') {
 			continue;
