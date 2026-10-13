@@ -103,11 +103,29 @@ for (const [id, input, output, cacheRead] of [
 	} });
 }
 
+// Snapshots the OpenAI API still serves but models.dev's first-party listing omits
+// (verified against https://developers.openai.com/api/docs/pricing/). The catalog wins if it lists them.
+for (const [id, input, output, toolCall] of [
+	['gpt-3.5-turbo-0125', 0.50, 1.50, true],
+	['gpt-3.5-turbo-1106', 1.00, 2.00, true],
+	['gpt-3.5-turbo-instruct', 1.50, 2.00, false],
+] as const) {
+	if (!modelIndex.has(id)) {
+		modelIndex.set(id, { provider: 'openai', model: {
+			id, name: id, cost: { input, output },
+			structured_output: false, tool_call: toolCall, reasoning: false,
+		} });
+	}
+}
+
 /**
  * Normalize a model ID by removing date suffixes and common variations.
  */
 function normalizeModel(modelId: string): string {
-	return modelId.replace(/-\d{4}-\d{2}-\d{2}$/, '');
+	return modelId
+		.replace(/-\d{4}-\d{2}-\d{2}$/, '')
+		// Gemini's stable versions (gemini-2.0-flash-001) are priced as the base model.
+		.replace(/^(gemini-.+)-\d{3}$/, '$1');
 }
 
 /**

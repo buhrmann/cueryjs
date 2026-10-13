@@ -18,6 +18,18 @@ Deno.test('dated model IDs resolve to the base model', () => {
 	assertEquals(getModelPricing('gpt-4.1-mini-2025-04-14')?.input, getModelPricing('gpt-4.1-mini')?.input);
 });
 
+Deno.test('Gemini stable versions resolve to the base model', () => {
+	assertEquals(getModelPricing('gemini-2.0-flash-001'), getModelPricing('gemini-2.0-flash'));
+	assertEquals(getModelInfo('gemini-2.0-flash-001')?.provider, 'google');
+});
+
+Deno.test('OpenAI snapshots missing from the catalog have OpenAI\'s prices', () => {
+	assertEquals(getModelPricing('gpt-3.5-turbo-0125')?.input, 0.5);
+	assertEquals(getModelPricing('gpt-3.5-turbo-0125')?.output, 1.5);
+	assertEquals(getModelPricing('gpt-3.5-turbo-1106')?.input, 1);
+	assertEquals(getModelPricing('gpt-3.5-turbo-instruct')?.output, 2);
+});
+
 Deno.test('the models cuery is commonly used with have prices', () => {
 	for (const model of ['gpt-4.1-mini', 'gpt-5.4-mini', 'gemini-3.8-flash', 'claude-haiku-4-5', 'claude-sonnet-5-5']) {
 		assertEquals(getModelPricing(model) != null, true, `no price for ${model}`);
