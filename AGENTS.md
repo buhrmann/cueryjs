@@ -227,3 +227,20 @@ curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/function_
     --header 'Content-Type: application/json' \
     --data '{"param": "value"}'
 ```
+
+## Releasing
+
+A push to `main` that changes `version` in `deno.json` publishes to JSR and npm (`.github/workflows/release.yml`).
+Prepare it with:
+
+```bash
+deno task release:prepare 0.13.0   # refresh pricing from models.dev, print what changed, set the version
+deno task check && deno task test
+git add deno.json src/assets/models.json && git commit -m "Release 0.13.0"
+```
+
+The pricing in `src/assets/models.json` is a snapshot of models.dev (`deno task update-models`), bundled so
+`getModelPricing` and `calculateCost` work offline. Review the printed changes before committing: models.dev is a
+community dataset (check a surprising price against the provider's own page). The release workflow fetches
+models.dev again and warns when the committed snapshot is already behind, but publishes the committed one.
+`deno task pricing:diff` shows the uncommitted pricing changes at any time.

@@ -31,7 +31,7 @@ Deno.test('OpenAI snapshots missing from the catalog have OpenAI\'s prices', () 
 });
 
 Deno.test('the models cuery is commonly used with have prices', () => {
-	for (const model of ['gpt-4.1-mini', 'gpt-5.4-mini', 'gemini-3.8-flash', 'claude-haiku-4-5', 'claude-sonnet-5-5']) {
+	for (const model of ['gpt-4.1-mini', 'gpt-5.4-mini', 'gemini-3.8-flash', 'claude-haiku-4-5', 'claude-haiku-5-5', 'claude-sonnet-5-5']) {
 		assertEquals(getModelPricing(model) != null, true, `no price for ${model}`);
 	}
 });

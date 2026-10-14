@@ -39,6 +39,16 @@ jobs:
         if: steps.version.outputs.changed == 'true'
         run: deno task check:dependency-age
 
+      # The release ships the pricing committed with it (refreshed and reviewed by
+      # `deno task release:prepare`). Models.dev is fetched again here only to warn when that
+      # snapshot is already behind; the committed file is restored before publishing.
+      - name: Check bundled pricing is current
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          deno task update-models
+          deno task pricing:diff --github
+          git checkout -- src/assets/models.json
+
       - name: Setup Node
         if: steps.version.outputs.changed == 'true'
         uses: actions/setup-node@v4
